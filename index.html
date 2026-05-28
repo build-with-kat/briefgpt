@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BriefGPT Kat</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#0d0d0d;
+  --white:#ffffff;
+  --green:#10a37f;
+  --green-light:#e6f4f1;
+  --green-dark:#0d8c6c;
+  --gray-50:#f9f9f9;
+  --gray-100:#f3f3f3;
+  --gray-200:#e8e8e8;
+  --gray-300:#d1d1d1;
+  --gray-400:#a0a0a0;
+  --gray-500:#6b6b6b;
+  --gray-700:#374151;
+  --gray-900:#111827;
+  --red:#c0392b;
+  --red-light:#fdf1f0;
+  --amber:#b45309;
+  --amber-light:#fef3c7;
+  --border:rgba(0,0,0,.08);
+
+  /* ── TYPE SCALE ── */
+  --text-xs:11px;      /* labels, badges, eyebrows */
+  --text-sm:12px;      /* mono codes, char counts, supporting */
+  --text-base:14px;    /* all body text */
+  --text-md:16px;      /* card titles, brand name */
+  --text-lg:18px;      /* hook text */
+  --text-xl:22px;      /* brief intro title */
+}
+
+html{scroll-behavior:smooth}
+body{background:var(--white);color:var(--black);font-family:'Inter',system-ui,sans-serif;font-size:var(--text-base);line-height:1.6;}
+
+/* NAV */
+nav{height:52px;padding:0 48px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--white);position:sticky;top:0;z-index:100;}
+.nav-logo{display:flex;align-items:center;gap:7px;}
+.nav-logo-mark{width:24px;height:24px;background:var(--black);border-radius:5px;display:flex;align-items:center;justify-content:center;}
+.nav-logo-mark svg{width:14px;height:14px;}
+.nav-logo-text{font-size:15px;font-weight:600;color:var(--black);letter-spacing:-.01em;}
+.nav-right{font-size:var(--text-xs);color:var(--gray-400);letter-spacing:.04em;}
+
+/* HERO */
+.hero{background:var(--black);padding:80px 0 72px;text-align:center;}
+.hero-inner{max-width:820px;margin:0 auto;padding:0 48px;}
+.hero-name{font-size:clamp(40px,5vw,56px);font-weight:700;color:var(--white);letter-spacing:-.03em;line-height:1.05;margin-bottom:10px;opacity:0;animation:fadeUp .5s ease .1s forwards;}
+.hero-greeting{font-size:16px;font-weight:400;color:var(--gray-400);margin-bottom:28px;opacity:0;animation:fadeUp .5s ease .2s forwards;}
+.hero-bio{font-size:17px;color:rgba(255,255,255,.7);line-height:1.8;max-width:640px;margin:0 auto;font-weight:300;opacity:0;animation:fadeUp .5s ease .3s forwards;}
+.hero-bio strong{color:var(--white);font-weight:500;}
+
+/* LOGOS */
+.logos-section{padding:48px 0;border-bottom:1px solid var(--border);}
+.logos-inner{max-width:820px;margin:0 auto;padding:0 48px;}
+.logos-label{font-size:var(--text-xs);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-400);margin-bottom:14px;}
+.logos-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.logos-row:last-child{margin-bottom:0;}
+.logo-pill{display:flex;align-items:center;gap:7px;padding:7px 14px;border:1px solid var(--border);border-radius:6px;font-size:var(--text-base);font-weight:500;color:var(--gray-700);background:var(--white);transition:border-color .15s;text-decoration:none;}
+.logo-pill:hover{border-color:var(--gray-300);}
+.logo-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* BRIEF INTRO */
+.brief-intro{padding:48px 0 32px;border-bottom:1px solid var(--border);}
+.brief-intro-inner{max-width:820px;margin:0 auto;padding:0 48px;}
+.brief-intro-label{font-size:var(--text-xs);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--green-dark);margin-bottom:10px;}
+.brief-intro-title{font-size:var(--text-xl);font-weight:600;color:var(--black);letter-spacing:-.02em;margin-bottom:8px;}
+.brief-intro-sub{font-size:var(--text-base);color:var(--gray-500);line-height:1.6;}
+
+/* BRIEF WRAP */
+.brief-wrap{max-width:820px;margin:0 auto;padding:32px 48px 80px;}
+
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--border);border-radius:8px;margin-bottom:14px;overflow:hidden;}
+.card-head{padding:10px 16px;background:var(--gray-50);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-label{font-size:var(--text-xs);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-500);}
+.card-body{padding:18px;}
+
+/* BADGES */
+.badge{font-size:var(--text-xs);font-weight:500;padding:2px 8px;border-radius:4px;}
+.badge-green{background:var(--green-light);color:var(--green-dark);}
+.badge-red{background:var(--red-light);color:var(--red);}
+.badge-amber{background:var(--amber-light);color:var(--amber);}
+.badge-gray{background:var(--gray-100);color:var(--gray-500);}
+.badge-black{background:var(--black);color:var(--white);}
+
+/* SNAPSHOT */
+.brand-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.brand-avi{width:40px;height:40px;border-radius:6px;background:var(--gray-900);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:var(--text-md);font-weight:600;flex-shrink:0;}
+.brand-name{font-size:var(--text-md);font-weight:600;color:var(--black);}
+.brand-sub{font-size:var(--text-xs);color:var(--gray-400);}
+.fit-num{font-size:28px;font-weight:600;color:var(--green);line-height:1;margin-left:auto;text-align:right;}
+.fit-lbl{font-size:var(--text-xs);color:var(--gray-400);text-transform:uppercase;letter-spacing:.06em;}
+
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.metric{background:var(--gray-50);border:1px solid var(--border);border-radius:6px;padding:10px 12px;}
+.metric-val{font-size:15px;font-weight:600;color:var(--black);margin-bottom:2px;}
+.metric-lbl{font-size:var(--text-xs);color:var(--gray-400);text-transform:uppercase;letter-spacing:.04em;}
+
+.tags-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.tags-box{border:1px solid var(--border);border-radius:6px;padding:10px 12px;}
+.tags-title{font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-400);margin-bottom:7px;}
+.tags-row{display:flex;gap:4px;flex-wrap:wrap;}
+.tag{font-size:var(--text-xs);padding:2px 8px;border-radius:4px;background:var(--gray-100);color:var(--gray-700);}
+
+/* PLATFORM FIT */
+.fit-rows{display:flex;flex-direction:column;}
+.fit-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.fit-row:last-child{border-bottom:none;}
+.fit-row-label{font-size:var(--text-base);color:var(--gray-500);width:200px;flex-shrink:0;}
+.fit-row-val{font-size:var(--text-base);color:var(--black);font-weight:500;flex:1;}
+.fit-pill{font-size:var(--text-xs);font-weight:500;padding:2px 8px;border-radius:4px;flex-shrink:0;margin-left:auto;}
+.fit-strong{background:var(--green-light);color:var(--green-dark);}
+.fit-note{margin-top:12px;padding:10px 12px;background:var(--gray-50);border-radius:6px;font-size:var(--text-base);color:var(--gray-500);border:1px solid var(--border);line-height:1.6;}
+
+/* GAP TABLE */
+.gap-table{width:100%;border-collapse:collapse;}
+.gap-table th{text-align:left;font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-400);padding:8px 12px;border-bottom:1px solid var(--border);background:var(--gray-50);}
+.gap-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+.gap-table tr:last-child td{border-bottom:none;}
+.gap-query{color:var(--gray-500);font-size:var(--text-base);}
+.gap-found{color:var(--green-dark);font-size:var(--text-base);margin-bottom:2px;}
+.gap-miss{color:var(--red);font-size:var(--text-base);font-weight:500;}
+.gap-present{color:var(--green-dark);font-weight:500;font-size:var(--text-base);}
+.gap-alert{margin-top:12px;padding:10px 12px;background:var(--red-light);border-radius:6px;font-size:var(--text-base);color:var(--red);font-weight:500;}
+
+/* CAMPAIGN */
+.objective-note{margin-bottom:12px;padding:10px 12px;background:var(--gray-50);border:1px solid var(--border);border-radius:6px;font-size:var(--text-base);color:var(--gray-500);line-height:1.6;}
+.campaign-block{border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.campaign-head{padding:10px 14px;background:var(--gray-50);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.campaign-name-label{font-size:var(--text-base);font-weight:500;color:var(--black);}
+.campaign-name-mono{font-size:var(--text-sm);font-family:'JetBrains Mono',monospace;color:var(--gray-400);margin-top:1px;}
+.adgroup{border-top:1px solid var(--border);}
+.adgroup-head{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
+.adgroup-name{font-size:var(--text-base);font-weight:500;color:var(--black);}
+.adgroup-cpc{font-size:var(--text-sm);font-family:'JetBrains Mono',monospace;color:var(--gray-400);display:flex;align-items:center;gap:8px;}
+.delivery{display:flex;align-items:center;gap:4px;font-size:var(--text-sm);color:var(--green-dark);}
+.delivery::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);display:block;}
+.context-box{margin:0 14px 10px;padding:8px 10px;background:var(--gray-50);border-radius:5px;border:1px solid var(--border);}
+.context-label{font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);margin-bottom:3px;}
+.context-text{font-size:var(--text-base);color:var(--gray-500);font-style:italic;line-height:1.6;}
+.ad-preview{margin:0 14px 14px;padding:10px 12px;border:1px solid var(--border);border-radius:6px;}
+.ad-preview-brand{font-size:var(--text-xs);color:var(--gray-400);margin-bottom:3px;display:flex;align-items:center;gap:5px;}
+.ad-preview-brand::before{content:'';width:12px;height:12px;background:var(--gray-900);border-radius:2px;display:block;}
+.ad-preview-hl{font-size:var(--text-base);font-weight:500;color:#1a0dab;margin-bottom:2px;}
+.ad-preview-desc{font-size:var(--text-base);color:var(--gray-500);}
+.char-row{display:flex;gap:16px;padding:0 14px 12px;}
+.char-item{font-size:var(--text-sm);color:var(--gray-400);}
+.char-item span{font-family:'JetBrains Mono',monospace;}
+
+/* CONTEXT HINTS GUIDE */
+.hints-guide{margin-bottom:14px;padding:14px;background:var(--green-light);border-radius:6px;border:1px solid rgba(13,140,108,.15);}
+.hints-guide-label{font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--green-dark);margin-bottom:8px;}
+.hints-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.hints-col-label{font-size:var(--text-xs);font-weight:600;color:var(--green-dark);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;}
+.hints-item{font-size:var(--text-base);color:var(--green-dark);padding:5px 0;border-bottom:1px solid rgba(13,140,108,.1);line-height:1.5;}
+.hints-item:last-child{border-bottom:none;}
+
+/* MEASUREMENT */
+.m-step{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);}
+.m-step:last-child{border-bottom:none;}
+.m-num{width:22px;height:22px;border-radius:50%;background:var(--black);color:var(--white);font-size:var(--text-xs);font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.m-title{font-size:var(--text-base);font-weight:500;color:var(--black);margin-bottom:3px;}
+.m-body{font-size:var(--text-base);color:var(--gray-500);line-height:1.6;}
+.m-code{margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:var(--text-sm);color:var(--green-dark);background:var(--green-light);padding:5px 8px;border-radius:4px;display:block;}
+.stat-box{margin-top:12px;padding:10px 14px;background:var(--amber-light);border-radius:6px;font-size:var(--text-base);color:var(--amber);font-weight:500;line-height:1.6;}
+
+/* REGULATORY */
+.reg-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.reg-row:last-child{border-bottom:none;}
+.reg-label{font-size:var(--text-base);font-weight:500;color:var(--black);width:180px;flex-shrink:0;}
+.reg-val{font-size:var(--text-base);color:var(--gray-500);line-height:1.6;}
+
+/* AM BRIEF */
+.hook-box{background:var(--black);border-radius:6px;padding:16px 18px;margin-bottom:14px;}
+.hook-label{font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-400);margin-bottom:6px;}
+.hook-text{font-size:var(--text-lg);color:var(--white);line-height:1.5;font-weight:400;letter-spacing:-.01em;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.brief-box{background:var(--gray-50);border:1px solid var(--border);border-radius:6px;padding:14px;}
+.brief-box-label{font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-400);margin-bottom:8px;}
+.q-list{display:flex;flex-direction:column;gap:8px;}
+.q-item{display:flex;gap:8px;font-size:var(--text-base);color:var(--gray-500);align-items:flex-start;line-height:1.5;}
+.q-num{font-family:'JetBrains Mono',monospace;font-size:var(--text-sm);color:var(--gray-300);flex-shrink:0;margin-top:2px;}
+
+/* MILESTONES */
+.milestone-row{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);}
+.milestone-row:last-child{border-bottom:none;}
+.milestone-day{font-family:'JetBrains Mono',monospace;font-size:var(--text-sm);font-weight:500;color:var(--green-dark);background:var(--green-light);padding:2px 8px;border-radius:4px;flex-shrink:0;margin-top:2px;}
+.milestone-text{font-size:var(--text-base);color:var(--gray-500);line-height:1.6;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+@media(max-width:640px){
+  .hero{padding:48px 0;}
+  .hero-inner,.logos-inner,.brief-intro-inner,.brief-wrap{padding-left:20px;padding-right:20px;}
+  .metrics{grid-template-columns:1fr 1fr;}
+  .tags-grid,.two-col,.hints-compare{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12s4.48 10 10 10 10-4.48 10-10zm-11 1H7l8-9v7h4l-8 9v-7z" fill="white"/>
+      </svg>
+    </div>
+    <span class="nav-logo-text">BriefGPT</span>
+  </div>
+  <div class="nav-right">Account Manager Brief · ChatGPT Ads</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-name">Hi, I'm Kat.</div>
+    <div class="hero-greeting">Growth Lead at Hone Health</div>
+    
+    <p class="hero-bio">Currently leading <strong>$15M in paid acquisition</strong> across Meta, Google, TikTok, and affiliate. Over 7 years launching and scaling paid channels, evaluating channel mix performance against business KPIs, working directly with platform account managers, and partnering cross-functionally with Creative, Product, and Engineering teams to drive subscriber growth and revenue. The brief below is how I would think about a new advertiser relationship from day one.</p>
+
+  </div>
+</section>
+
+<!-- LOGOS -->
+<section class="logos-section">
+  <div class="logos-inner">
+    <div class="logos-label">Background</div>
+    <div class="logos-row">
+      <a href="https://honehealth.com" target="_blank" rel="noopener" class="logo-pill"><div class="logo-dot" style="background:#F5C518;"></div>Hone Health</a>
+      <a href="https://thrivemarket.com" target="_blank" rel="noopener" class="logo-pill"><div class="logo-dot" style="background:#00A651;"></div>Thrive Market</a>
+      <a href="https://curology.com" target="_blank" rel="noopener" class="logo-pill"><div class="logo-dot" style="background:#6B4FBB;"></div>Curology</a>
+    </div>
+    <div class="logos-label">Platforms</div>
+    <div class="logos-row">
+      <div class="logo-pill"><div class="logo-dot" style="background:#1877F2;"></div>Meta</div>
+      <div class="logo-pill"><div class="logo-dot" style="background:#4285F4;"></div>Google</div>
+      <div class="logo-pill"><div class="logo-dot" style="background:#000000;"></div>TikTok</div>
+      <div class="logo-pill"><div class="logo-dot" style="background:#FF4500;"></div>Reddit</div>
+      <div class="logo-pill"><div class="logo-dot" style="background:#E60023;"></div>Pinterest</div>
+    </div>
+  </div>
+</section>
+
+<!-- BRIEF INTRO -->
+<section class="brief-intro" id="brief">
+  <div class="brief-intro-inner">
+    <div class="brief-intro-label">Account Manager Brief · ChatGPT Ads</div>
+    <div class="brief-intro-title">Hims & Hers Health</div>
+    <div class="brief-intro-sub">Here is how I would prepare for a first call with a new advertiser on ChatGPT Ads.</div>
+  </div>
+</section>
+
+<!-- BRIEF CONTENT -->
+<div class="brief-wrap">
+
+  <!-- 1. SNAPSHOT -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-label">Company snapshot</div>
+      <span class="badge badge-green">Fit score 94</span>
+    </div>
+    <div class="card-body">
+      <div class="brand-row">
+        <div class="brand-avi">H</div>
+        <div>
+          <div class="brand-name">Hims & Hers Health</div>
+          <div class="brand-sub">hims.com · NYSE: HIMS · DTC telehealth platform</div>
+        </div>
+        <div style="margin-left:auto;text-align:right;">
+          <div class="fit-num">94</div>
+          <div class="fit-lbl">fit score</div>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="metric-val">8.2M</div><div class="metric-lbl">Monthly traffic</div></div>
+        <div class="metric"><div class="metric-val">$2M+</div><div class="metric-lbl">Est. ad spend/mo</div></div>
+        <div class="metric"><div class="metric-val">Telehealth</div><div class="metric-lbl">Vertical</div></div>
+        <div class="metric"><div class="metric-val" style="font-size:var(--text-base);line-height:1.4;">Men 25–44<br>Women 28–45</div><div class="metric-lbl">Audience</div></div>
+      </div>
+      <div class="tags-grid">
+        <div class="tags-box">
+          <div class="tags-title">Current channels</div>
+          <div class="tags-row">
+            <span class="tag">Google Search</span>
+            <span class="tag">Meta</span>
+            <span class="tag">Connected TV</span>
+            <span class="tag">Podcast</span>
+            <span class="tag">Affiliate</span>
+          </div>
+        </div>
+        <div class="tags-box">
+          <div class="tags-title">Top products</div>
+          <div class="tags-row">
+            <span class="tag">ED treatment</span>
+            <span class="tag">Hair loss</span>
+            <span class="tag">GLP-1</span>
+            <span class="tag">Skincare</span>
+            <span class="tag">Mental health</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. PLATFORM FIT -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-label">Platform fit</div>
+    </div>
+    <div class="card-body">
+      <div class="fit-rows">
+        <div class="fit-row">
+          <div class="fit-row-label">Buyer profile</div>
+          <div class="fit-row-val">Primary buyers 25–44 strong overlap with ChatGPT free tier</div>
+          <span class="fit-pill fit-strong">Strong</span>
+        </div>
+        <div class="fit-row">
+          <div class="fit-row-label">Purchase behaviour</div>
+          <div class="fit-row-val">High-consideration, research-led decisions before purchasing</div>
+          <span class="fit-pill fit-strong">Strong</span>
+        </div>
+      </div>
+      <div class="fit-note">Health decisions are high-consideration. Buyers research symptoms, compare treatment options, and seek recommendations before purchasing. That is exactly the moment ChatGPT captures and where Hims needs to be present.</div>
+    </div>
+  </div>
+
+  <!-- 3. AI GAP -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-label">ChatGPT AI visibility gap</div>
+      <span class="badge badge-red">3 of 4 queries missing</span>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <table class="gap-table">
+        <thead>
+          <tr><th>ChatGPT query</th><th>What appears today</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="gap-query">"best ED treatment online"</td>
+            <td><div class="gap-found">Ro, BlueChew appearing</div><div class="gap-miss">Hims ED treatment missing</div></td>
+          </tr>
+          <tr>
+            <td class="gap-query">"hair loss treatment for men"</td>
+            <td><div class="gap-found">Keeps, Ro Hair appearing</div><div class="gap-miss">Hims Hair missing</div></td>
+          </tr>
+          <tr>
+            <td class="gap-query">"GLP-1 prescription online"</td>
+            <td><div class="gap-found">Ro, Noom Med appearing</div><div class="gap-miss">Hims Weight missing</div></td>
+          </tr>
+          <tr>
+            <td class="gap-query">"online men's health clinic"</td>
+            <td><div class="gap-present">✓ Hims appearing</div></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="gap-alert" style="margin:12px;">Hims appears for brand queries but is missing from all three highest-intent product searches the exact moments buyers are deciding between treatment options.</div>
+    </div>
+  </div>
+
+  <!-- 4. CAMPAIGN -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-label">Campaign structure</div>
+      <div style="display:flex;gap:5px;">
+        <span class="badge badge-black">Clicks</span>
+        <span class="badge badge-gray">US</span>
+        <span class="badge badge-green">Conversions live June 5</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="objective-note"><strong style="color:var(--black);">Two objectives available: Reach (CPM) and Clicks (CPC, $3-5 per click).</strong> Start with Clicks. Hims has strong brand recognition so traffic to product pages will convert. Accounts with the pixel installed before June 1 get early access to Conversions bidding starting June 5.</div>
+
+      <div class="hints-guide">
+        <div class="hints-guide-label">How to write context hints</div>
+        <p style="font-size:var(--text-base);color:var(--green-dark);margin-bottom:10px;line-height:1.6;">Context hints describe the conversation, not the query. Unlike keywords, they guide the matching system to find the right moment in an ongoing dialogue. A user who once Googled "ED treatment" now types a full paragraph into ChatGPT about symptoms, concerns, and what they have already tried..</p>
+        <div class="hints-compare">
+          <div>
+            <div class="hints-col-label" style="color:var(--red);">Too broad</div>
+            <div class="hints-item">"erectile dysfunction treatment"</div>
+            <div class="hints-item">"hair loss"</div>
+            <div class="hints-item">"weight loss medication"</div>
+          </div>
+          <div>
+            <div class="hints-col-label">Right approach</div>
+            <div class="hints-item">"Men researching discreet treatment options for ED without visiting a doctor in person"</div>
+            <div class="hints-item">"Men in their 30s and 40s noticing thinning hair and looking for clinically proven options"</div>
+            <div class="hints-item">"People asking about GLP-1 options, comparing semaglutide alternatives and online prescriptions"</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="campaign-block">
+        <div class="campaign-head">
+          <div>
+            <div class="campaign-name-label">Campaign 1</div>
+            <div class="campaign-name-mono">Hims_Clicks_US_May2026</div>
+          </div>
+          <div style="display:flex;gap:5px;">
+            <span class="badge badge-black">Clicks</span>
+            <span class="badge badge-gray">US</span>
+          </div>
+        </div>
+
+        <div class="adgroup">
+          <div class="adgroup-head">
+            <div class="adgroup-name">ED & sexual health</div>
+            <div class="adgroup-cpc">$3–5 CPC <span class="delivery">Strong delivery</span></div>
+          </div>
+          <div class="context-box">
+            <div class="context-label">Context hints</div>
+            <div class="context-text">Men researching discreet treatment options for erectile dysfunction, looking for online medical consultation without visiting a doctor in person, comparing prescription ED treatments</div>
+          </div>
+          <div class="ad-preview">
+            <div class="ad-preview-brand">Hims & Hers · Sponsored</div>
+            <div class="ad-preview-hl">Hims: Discreet ED Treatment Online</div>
+            <div class="ad-preview-desc">Board-certified doctors, same-day prescriptions. No appointment needed, no waiting room.</div>
+          </div>
+          <div class="char-row">
+            <div class="char-item">Headline <span>38/50</span></div>
+            <div class="char-item">Description <span>87/100</span></div>
+          </div>
+          <div class="ad-preview" style="border-top:1px dashed var(--border);margin-top:-4px;border-radius:0 0 6px 6px;">
+            <div class="ad-preview-brand">Hims & Hers · Sponsored · Variant B</div>
+            <div class="ad-preview-hl">Talk to a Doctor About ED Today</div>
+            <div class="ad-preview-desc">Licensed physicians available online. Private consultation, prescription if appropriate.</div>
+          </div>
+          <div class="char-row">
+            <div class="char-item">Headline <span>33/50</span></div>
+            <div class="char-item">Description <span>82/100</span></div>
+          </div>
+        </div>
+
+        <div class="adgroup">
+          <div class="adgroup-head">
+            <div class="adgroup-name">Hair loss & regrowth</div>
+            <div class="adgroup-cpc">$3–5 CPC <span class="delivery">Strong delivery</span></div>
+          </div>
+          <div class="context-box">
+            <div class="context-label">Context hints</div>
+            <div class="context-text">Men in their 30s and 40s noticing thinning hair, researching clinically proven hair loss treatments, comparing finasteride and minoxidil options online</div>
+          </div>
+          <div class="ad-preview">
+            <div class="ad-preview-brand">Hims & Hers · Sponsored</div>
+            <div class="ad-preview-hl">Hims: FDA-Approved Hair Loss Rx</div>
+            <div class="ad-preview-desc">Clinically proven finasteride, delivered to your door. Free online consultation included.</div>
+          </div>
+          <div class="char-row">
+            <div class="char-item">Headline <span>32/50</span></div>
+            <div class="char-item">Description <span>83/100</span></div>
+          </div>
+        </div>
+
+        <div class="adgroup">
+          <div class="adgroup-head">
+            <div class="adgroup-name">GLP-1 & weight management</div>
+            <div class="adgroup-cpc">$3–5 CPC <span class="delivery">Strong delivery</span></div>
+          </div>
+          <div class="context-box">
+            <div class="context-label">Context hints</div>
+            <div class="context-text">People asking about GLP-1 medication options, comparing semaglutide alternatives, researching online weight loss prescriptions without long waitlists</div>
+          </div>
+          <div class="ad-preview">
+            <div class="ad-preview-brand">Hims & Hers · Sponsored</div>
+            <div class="ad-preview-hl">Hims: GLP-1 Weight Loss Online</div>
+            <div class="ad-preview-desc">Semaglutide prescribed by licensed doctors. Insurance-free, ships direct. No waitlist.</div>
+          </div>
+          <div class="char-row">
+            <div class="char-item">Headline <span>30/50</span></div>
+            <div class="char-item">Description <span>82/100</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MEASUREMENT -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-label">Measurement and tracking</div>
+      <span class="badge badge-red">Set up before launch</span>
+    </div>
+    <div class="card-body">
+      <div style="padding:10px 12px;background:var(--gray-50);border:1px solid var(--border);border-radius:6px;margin-bottom:16px;font-size:var(--text-base);color:var(--gray-500);line-height:1.6;">The Ads Manager shows impressions, clicks, CTR, and CPC natively. To understand whether those clicks are driving real business outcomes: sign-ups, subscriptions, revenue. Measurement infrastructure needs to be in place before any campaign goes live.</div>
+
+      <div class="m-step">
+        <div class="m-num">1</div>
+        <div>
+          <div class="m-title">Install the OAIQ pixel on conversion pages</div>
+          <div class="m-body">Place the pixel on Hims's subscription confirmation and sign-up pages before launch. Fire <code style="font-family:'JetBrains Mono',monospace;font-size:var(--text-sm);background:var(--green-light);color:var(--green-dark);padding:1px 5px;border-radius:3px;">subscription_created</code> and <code style="font-family:'JetBrains Mono',monospace;font-size:var(--text-sm);background:var(--green-light);color:var(--green-dark);padding:1px 5px;border-radius:3px;">trial_started</code> events. The OAIQ pixel sets a first-party cookie that is not affected by browser restrictions more reliable than third-party attribution. Accounts with the pixel installed before June 1 qualify for Conversions objective access starting June 5.</div>
+        </div>
+      </div>
+
+      <div class="m-step">
+        <div class="m-num">2</div>
+        <div>
+          <div class="m-title">Connect the Conversions API for server-side tracking</div>
+          <div class="m-body">The Conversions API sends the same events server-side, deduplicating against pixel data. Fire the same events from the server as a fallback for cases where the browser pixel may be blocked. Use OpenAI's shared key to ensure events are not double-counted. This is the setup pattern every mature ad platform has converged on OpenAI is using the same approach.</div>
+        </div>
+      </div>
+
+      <div class="m-step">
+        <div class="m-num">3</div>
+        <div>
+          <div class="m-title">Tag all destination URLs with UTM parameters</div>
+          <div class="m-body">UTMs persist on click and flow into GA4, making ChatGPT ad traffic identifiable and comparable against Google and Meta. Create a custom channel group called Paid AI to separate ChatGPT ad traffic from organic ChatGPT citations.</div>
+          <div class="m-code">utm_source=chatgpt&utm_medium=cpc&utm_campaign=ed-treatment</div>
+        </div>
+      </div>
+
+
+      <div style="margin-bottom:16px;padding:12px 14px;background:var(--gray-50);border:1px solid var(--border);border-radius:6px;">
+        <div style="font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);margin-bottom:8px;">Budget guidance</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+          <div>
+            <div style="font-size:var(--text-xs);font-weight:600;color:var(--black);margin-bottom:3px;">Minimum to learn</div>
+            <div style="font-size:var(--text-base);color:var(--gray-500);line-height:1.5;">$100/day minimum. Below this, volume is too low to draw any conclusions within a reasonable timeframe.</div>
+          </div>
+          <div>
+            <div style="font-size:var(--text-xs);font-weight:600;color:var(--black);margin-bottom:3px;">Recommended test budget</div>
+            <div style="font-size:var(--text-base);color:var(--gray-500);line-height:1.5;">$3,000-5,000/month for meaningful data. Enough to compare ad groups and context hints with statistical confidence.</div>
+          </div>
+          <div>
+            <div style="font-size:var(--text-xs);font-weight:600;color:var(--black);margin-bottom:3px;">Learning phase</div>
+            <div style="font-size:var(--text-base);color:var(--gray-500);line-height:1.5;">Conversions objective needs 50 conversions/week to exit learning. If volume is too low, start with Clicks and switch once data accumulates.</div>
+          </div>
+        </div>
+      </div>
+      <div class="stat-box">⚠ Conversions objective launches June 5 for accounts with the pixel installed before June 1. Advertisers without measurement in place will not qualify for early access. Getting the OAIQ pixel and Conversions API live on day one is the single most important onboarding action.</div>
+    </div>
+  </div>
+
+  <!-- 6. REGULATORY -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-label">Regulatory considerations</div>
+      <span class="badge badge-amber">Health advertising</span>
+    </div>
+    <div class="card-body">
+      <div style="padding:10px 12px;background:var(--gray-50);border:1px solid var(--border);border-radius:6px;margin-bottom:14px;font-size:var(--text-base);color:var(--gray-500);line-height:1.6;">Health brands require legal and compliance review before any campaign goes live. Flag this at the onboarding call plan for a two-week review cycle, not a same-week launch.</div>
+      <div class="reg-row">
+        <div class="reg-label">FDA prescription rules</div>
+        <div class="reg-val">All prescription references require "prescribed by a licensed physician" qualifier. No efficacy claims without clinical substantiation.</div>
+      </div>
+      <div class="reg-row">
+        <div class="reg-label">FTC disclosure</div>
+        <div class="reg-val">Sponsored label must be clearly visible. No misleading comparative claims against named competitors.</div>
+      </div>
+      <div class="reg-row">
+        <div class="reg-label">Before and after claims</div>
+        <div class="reg-val">Prohibited. No transformation language or specific outcome guarantees in ad copy.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. AM BRIEF -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-label">Account Manager brief</div>
+      <span class="badge badge-gray">Onboarding call prep</span>
+    </div>
+    <div class="card-body">
+      <div class="hook-box">
+        <div class="hook-label">Opening</div>
+        <div class="hook-text">Ro owns your top ED query in ChatGPT right now. Hims is not appearing once across your three highest-intent product categories.</div>
+      </div>
+      <div class="two-col">
+        <div class="brief-box">
+          <div class="brief-box-label">Questions to ask</div>
+          <div class="q-list">
+            <div class="q-item"><span class="q-num">01</span>What does your current attribution setup look like across Google and Meta last click or data-driven?</div>
+            <div class="q-item"><span class="q-num">02</span>What is your target CPA for each product line ED, hair loss, and GLP-1?</div>
+            <div class="q-item"><span class="q-num">03</span>Have you checked whether Hims appears organically in ChatGPT for your top product categories?</div>
+          </div>
+        </div>
+        <div class="brief-box">
+          <div class="brief-box-label">Questions they will ask</div>
+          <div class="q-list">
+            <div class="q-item"><span class="q-num">01</span>How does ChatGPT decide which ads appear is it keyword targeting like Google?</div>
+            <div class="q-item"><span class="q-num">02</span>Can we track downstream conversions even though Conversions bidding is not live yet?</div>
+            <div class="q-item"><span class="q-num">03</span>Will our ads influence what ChatGPT recommends organically?</div>
+          </div>
+        </div>
+      </div>
+      <div class="brief-box">
+        <div class="brief-box-label">90-day milestones</div>
+        <div class="q-list">
+          <div class="milestone-row">
+            <span class="milestone-day">30d</span>
+            <span class="milestone-text">OAIQ pixel live, Conversions API connected, UTMs in place, all three ad groups launched</span>
+          </div>
+          <div class="milestone-row">
+            <span class="milestone-day">60d</span>
+            <span class="milestone-text">First performance review CTR by ad group, effective CPA vs Google benchmark, GA4 conversion rate from ChatGPT traffic. Refine context hints based on what is resonating.</span>
+          </div>
+          <div class="milestone-row">
+            <span class="milestone-day">90d</span>
+            <span class="milestone-text">Scale top-performing ad group, revise or pause underperformer, present incremental budget case to Hims leadership based on performance data.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
